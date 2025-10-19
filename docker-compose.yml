@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database with PostGIS
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: sentinel-postgres
+    environment:
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinel_dev
+      POSTGRES_DB: sentinel_nigeria
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./packages/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis cache
+  redis:
+    image: redis:7-alpine
+    container_name: sentinel-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Next.js web dashboard
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: sentinel-web
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://sentinel:sentinel_dev@postgres:5432/sentinel_nigeria
+      - REDIS_URL=redis://redis:6379
+      - NEXT_PUBLIC_REALTIME_URL=http://localhost:4000
+      - NEXT_PUBLIC_ML_SERVICE_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run dev
+
+  # Socket.io realtime server
+  realtime:
+    build:
+      context: ./apps/realtime
+      dockerfile: Dockerfile
+    container_name: sentinel-realtime
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - REDIS_URL=redis://redis:6379
+      - CORS_ORIGIN=http://localhost:3000
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./apps/realtime:/app
+      - /app/node_modules
+      - /app/dist
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: npm run dev
+
+  # Python ML service
+  ml-service:
+    build:
+      context: ./packages/ml-service
+      dockerfile: Dockerfile
+    container_name: sentinel-ml
+    environment:
+      - DATABASE_URL=postgresql://sentinel:sentinel_dev@postgres:5432/sentinel_nigeria
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./packages/ml-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  postgres_data:
+  redis_data:

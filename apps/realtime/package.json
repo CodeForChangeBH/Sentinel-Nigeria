@@ -1,0 +1,35 @@
+{
+  "name": "@sentinel-nigeria/realtime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WebSocket server for real-time features (journey tracking, panic button, alerts)",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.5",
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "redis": "^4.6.13",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.20",
+    "@types/cors": "^2.8.17",
+    "@types/jsonwebtoken": "^9.0.6",
+    "typescript": "^5.3.3",
+    "ts-node-dev": "^2.0.0",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12"
+  }
+}
