@@ -130,6 +130,143 @@ python main.py
 
 ---
 
+## 🧠 Example API Usage
+
+Here are some basic examples showing how developers can interact with the Sentinel Nigeria API
+for authentication, reporting incidents, and tracking journeys.
+
+### Example 1: User Authentication (Login)
+
+**JavaScript**
+```javascript
+import axios from "axios";
+
+async function login(email, password) {
+  const response = await axios.post("https://api.sentinelnigeria.org/auth/login", {
+    email,
+    password,
+  });
+  console.log(response.data); // { token: "abc123", user: { ... } }
+}
+
+login("test@example.com", "mypassword");
+```
+
+**Python**
+```python
+import requests
+
+data = {"email": "test@example.com", "password": "mypassword"}
+res = requests.post("https://api.sentinelnigeria.org/auth/login", json=data)
+print(res.json())  # {'token': 'abc123', 'user': {...}}
+```
+
+### Example 2: Creating an Incident Report
+
+**JavaScript**
+```javascript
+import axios from "axios";
+
+async function createIncident(token) {
+  const incident = {
+    type: "kidnapping",
+    description: "Suspicious vehicle reported near highway",
+    latitude: 9.0765,
+    longitude: 7.3986,
+  };
+
+  const response = await axios.post("https://api.sentinelnigeria.org/incidents", incident, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  console.log(response.data); // { id: 123, status: "reported" }
+}
+```
+
+**Python**
+```python
+import requests
+
+token = "abc123"
+incident = {
+    "type": "kidnapping",
+    "description": "Suspicious vehicle reported near highway",
+    "latitude": 9.0765,
+    "longitude": 7.3986
+}
+
+res = requests.post(
+    "https://api.sentinelnigeria.org/incidents",
+    json=incident,
+    headers={"Authorization": f"Bearer {token}"}
+)
+print(res.json())  # {'id': 123, 'status': 'reported'}
+```
+
+### Example 3: Fetching Nearby Incidents
+
+**JavaScript**
+```javascript
+import axios from "axios";
+
+async function getNearbyIncidents() {
+  const response = await axios.get(
+    "https://api.sentinelnigeria.org/incidents/nearby?lat=9.08&lng=7.40&radius=10"
+  );
+  console.log(response.data); // Array of nearby incidents
+}
+
+getNearbyIncidents();
+```
+
+**Python**
+```python
+import requests
+
+res = requests.get("https://api.sentinelnigeria.org/incidents/nearby?lat=9.08&lng=7.40&radius=10")
+print(res.json())  # [{'id': 123, 'type': 'kidnapping', ...}]
+```
+
+### 🛰️ Example 4: Starting a Journey Tracking Session
+
+**JavaScript**
+```javascript
+import axios from "axios";
+
+async function startJourney(token) {
+  const journey = {
+    startLocation: "Abuja",
+    destination: "Kaduna",
+    vehicle: "Toyota Corolla",
+  };
+
+  const response = await axios.post("https://api.sentinelnigeria.org/journeys/start", journey, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  console.log(response.data); // { journeyId: 45, status: "active" }
+}
+```
+
+**Python**
+```python
+import requests
+
+token = "abc123"
+journey = {
+    "startLocation": "Abuja",
+    "destination": "Kaduna",
+    "vehicle": "Toyota Corolla"
+}
+
+res = requests.post(
+    "https://api.sentinelnigeria.org/journeys/start",
+    json=journey,
+    headers={"Authorization": f"Bearer {token}"}
+)
+print(res.json())  # {'journeyId': 45, 'status': 'active'}
+```
+
 ## Project Roadmap
 
 ### **Phase 1: MVP (Months 1-3)** - Coming Q1 2026
